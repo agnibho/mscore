@@ -1,0 +1,146 @@
+#! /bin/bash
+
+# Copyright (c) 2017 Agnibho Mondal
+# All rights reserved
+#
+# This file is part of Mscore.
+#
+# Mscore is free software: you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# Mscore is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License along with
+# Mscore.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Agnibho Mondal
+# contact@agnibho.com
+# www.agnibho.com
+
+DIR="/home/agnibho/program/mscore/data/";
+
+INPUT=(0);
+GROUP=(0 0);
+G=1;
+TOT=0;
+
+function invalid {
+	echo "Invalid input";
+	exit 1;
+}
+
+function input {
+	if [ -z "$1" ];then
+		exit 1;
+	else
+		line=$1;
+	fi
+	REG=$(grep -Eo "\[.*?\]" <<< "$line" | sed "s/[][]//g" | sed "s/ //g");
+	PR=$(echo "$line" | sed "s/\[.*\]//g")"[$REG] : ";
+	read -p "$PR" -u 3 IN;
+	if [[ -z "$IN" ]];then
+		IN=0;
+	fi
+	if [[ "$IN" =~ ' ' ]];then
+		invalid;
+	elif [[ "$REG" =~ - ]];then
+		l=$(echo "$REG" | sed "s/-.*//g");
+		u=$(echo "$REG" | sed "s/.*-//g");
+		if (( "$IN" >= "$l" && "$IN" <= "$u" ));then
+			INPUT+=("$IN");
+			GROUP[$G]+="+$IN";
+		else
+			invalid;
+		fi
+	elif [[ "$REG" =~ , ]];then
+		readarray -d , -t n <<< "$REG";
+		if [[ "${n[@]}" =~ "$IN" ]];then
+			INPUT+=("$IN");
+			GROUP[$G]+="+$IN";
+		else
+			invalid;
+		fi
+	elif [[ "$REG" =~ [yn] ]];then
+		if [[ "${IN,,}" =~ [y1] ]];then
+			INPUT+=(1);
+			GROUP[$G]+="+1";
+		elif [[ "${IN,,}" =~ [n0] ]];then
+			INPUT+=(0);
+		else
+			invalid;
+		fi
+	else
+		echo "Error processing [$REG]";
+		exit 1;
+	fi
+}
+
+function output {
+	if [ -z "$1" ];then
+		exit 1;
+	else
+		line=$1;
+	fi
+	FLAG="";
+	readarray -t PATS <<<"$(grep -Po "\[.*?\]" <<< "$line")";
+	for P in "${PATS[@]}";do
+		I="$(echo "$P" | sed "s/[][]//g" | sed "s/ //g" | sed "s/vt/$TOT/g" | sed -r "s/v([0-9]+)/$\{INPUT\[\1\]\}/g" | sed -r "s/g([0-9]+)/$\{GROUP\[\1\]\}/g" | sed -r "s/([=\<\>])/ \1 /g" | sed -r "s/([\<\>])\s+=/\1=/g" | sed "s/and/ \&\& /g" | sed "s/or/ \|\| /g")";
+		if [[ "$I" =~ [=\<\>\&\|] ]];then
+			if ! eval "(( $I ))";then
+				return;
+			fi
+			line=${line/"$P"/""};
+		elif [[ "$I" == "!" ]];then
+			FLAG="stop";
+			line=${line/"$P"/""};
+		else
+			I=$(eval "echo $I" | bc);
+			line=${line/"$P"/"$I"};
+		fi
+	done
+	echo "$line";
+	if [ "$FLAG" = "stop" ];then
+		exit 0;
+	fi
+}
+
+if [ -f "$DIR$1" ];then
+	SECTION="";
+	while read line;do
+		if [[ "$line" =~ ^# ]];then
+			continue;
+		elif [[ "$line" =~ ^= ]];then
+			if [ "$SECTION" = "input" ];then
+				SECTION="output";
+				TOT=$(echo ${INPUT[@]} | sed "s/ /+/g" | bc);
+				GROUP[$G]=$(echo "${GROUP[$G]}"|bc);
+			fi
+			echo "$line";
+		elif [[ "$line" =~ ^- ]];then
+			if [ "$SECTION" = "input" ];then
+				GROUP[$G]=$(echo "${GROUP[$G]}"|bc);
+				((G++));
+				GROUP[$G]="0";
+			fi
+			echo "$line";
+		elif [[ "$line" =~ \[.*?\] ]];then
+			if [ "$SECTION" = "input" ];then
+				input "$line";
+			elif [ "$SECTION" = "output" ];then
+				output "$line";
+			else
+				SECTION="input";
+				input "$line";
+			fi
+		else
+			echo "$line";
+		fi
+	done 3<&0 < "$DIR$1"
+else
+	echo "Available scores: ";
+	ls "$DIR";
+fi

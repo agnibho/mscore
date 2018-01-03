@@ -1,0 +1,41 @@
+Glasgow Coma Scale
+==================
+
+Eye
+---
+(1) No eye oprning
+(2) Eye opening on painful stimulus
+(3) Eye opening on voice command
+(4) Spontaneous eye opening
+
+[1-4]
+
+Verbal
+------
+(1) No sound
+(2) Incomprehensible sound
+(3) Incoherent words
+(4) Confused, disoriented
+(5) Normal conversation
+
+[1-5]
+
+Motor
+-----
+(1) No movement
+(2) Extension to painful stimuli
+(3) Flexion to painful stimuli
+(4) Withdrawal to painful stimuli
+(5) Localization to painful stimuli
+(6) Obeys command
+
+[1-6]
+
+===================================
+
+Score = GCS [vt] (E[v1] V[v2] M[v3])
+
+Brain injury:
+[vt<8] Severe
+[vt>=8 and vt<=12] Moderate
+[vt>12] Mild

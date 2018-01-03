@@ -1,0 +1,29 @@
+Modified Jones Criteria for Rheumatic Fever
+===========================================
+
+Major Criteria
+--------------
+1. Polyarthritis [yn]
+2. Carditis [yn]
+3. Subcutaneous Nodules [yn]
+4. Erythema Marginatum [yn]
+5. Sydenham's chorea [yn]
+
+Minor Criteria
+--------------
+1. Fever [yn]
+2. Arthralgia [yn]
+3. ↑ESR / ↑CRP [yn]
+4. Leukocytosis [yn]
+5. ECG changes [yn]
+6. Previous history [yn]
+
+Required Criteria
+-----------------
+* Evidence of antecedent Strep infection [yn]
+
+=============================================
+
+[g1>=2 and g3>0]Diagnostic of Rheumatic Fever [!]
+[g1>=1 and g2>=2 and g3>0]Diagnostic of Rheumatic Fever [!]
+Not diagnostic of Rheumatic Fever
